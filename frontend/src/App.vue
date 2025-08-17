@@ -1,55 +1,5 @@
 <template>
   <div id="app" class="min-h-screen bg-gray-50">
-    <!-- Navigation for public pages -->
-    <nav v-if="!isAdminRoute" class="bg-white shadow-lg border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center">
-            <router-link to="/" class="flex items-center space-x-2">
-              <i class="fas fa-crown text-2xl text-blue-600"></i>
-              <span class="text-xl font-bold text-gray-800">Satta King Portal</span>
-            </router-link>
-          </div>
-          
-          <div class="flex items-center space-x-6">
-            <router-link
-              to="/"
-              class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              :class="{ 'text-blue-600 bg-blue-50': $route.name === 'Home' }"
-            >
-              <i class="fas fa-home mr-1"></i>
-              Home
-            </router-link>
-            
-            <router-link
-              to="/results"
-              class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              :class="{ 'text-blue-600 bg-blue-50': $route.name === 'Results' }"
-            >
-              <i class="fas fa-list-ol mr-1"></i>
-              Results
-            </router-link>
-            
-            <router-link
-              to="/archive"
-              class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              :class="{ 'text-blue-600 bg-blue-50': $route.name === 'Archive' }"
-            >
-              <i class="fas fa-archive mr-1"></i>
-              Archive
-            </router-link>
-            
-            <router-link
-              to="/admin/login"
-              class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
-            >
-              <i class="fas fa-user-shield mr-1"></i>
-              Admin
-            </router-link>
-          </div>
-        </div>
-      </div>
-    </nav>
 
     <!-- Admin Navigation -->
     <nav v-if="isAdminRoute && authStore.isLoggedIn" class="bg-gray-800 shadow-lg">
@@ -115,6 +65,16 @@
         </div>
       </div>
     </nav>
+
+    <!-- Public Header -->
+    <header v-if="!isAdminRoute" class="bg-white shadow">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <router-link to="/" class="flex items-center space-x-2">
+          <i class="fas fa-crown text-2xl text-blue-500"></i>
+          <span class="text-2xl font-bold text-gray-800">Satta King Portal</span>
+        </router-link>
+      </div>
+    </header>
 
     <!-- Main content -->
     <main class="flex-1">

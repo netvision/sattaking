@@ -1,13 +1,18 @@
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Header -->
-    <div class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-gray-800 mb-4">
-        <i class="fas fa-archive text-purple-600 mr-2"></i>
-        Results Archive
-      </h1>
-      <p class="text-gray-600">Browse historical lottery results by date</p>
+  <!-- Hero Banner -->
+  <div class="bg-gradient-to-br from-blue-600 to-purple-700 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="text-center">
+        <h1 class="text-4xl md:text-6xl font-extrabold mb-4">
+          <i class="fas fa-archive text-yellow-400 mr-2"></i>
+          Results Archive
+        </h1>
+        <p class="text-xl md:text-2xl text-blue-100 mb-2">Explore past lottery results using our comprehensive archive.</p>
+        <p class="text-lg text-blue-200 max-w-2xl mx-auto">Select a date below to view detailed historical draws.</p>
+      </div>
     </div>
+  </div>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     <!-- Date Selector -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-8">
@@ -77,32 +82,18 @@
         <div
           v-for="result in resultsStore.archiveResults"
           :key="result.id"
-          class="result-card"
+          class="bg-white rounded-lg shadow-lg p-6 hover:shadow-2xl transition-all duration-200"
         >
-          <div class="flex justify-between items-start mb-4">
-            <div>
-              <h3 class="text-lg font-semibold text-gray-800">{{ result.slot.title }}</h3>
-              <p class="text-sm text-gray-500">
-                <i class="fas fa-clock mr-1"></i>
-                {{ formatTime(result.declared_at) }}
-              </p>
-            </div>
-            
-            <div class="flex flex-col items-end space-y-2">
-              <span v-if="result.is_auto" class="badge badge-info">
-                <i class="fas fa-robot mr-1"></i>
-                Auto
-              </span>
-              <span v-if="result.locked" class="badge badge-success">
-                <i class="fas fa-lock mr-1"></i>
-                Final
-              </span>
-            </div>
+          <div class="text-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">{{ result.slot.title }}</h3>
+            <p class="text-sm text-gray-500">
+              <i class="fas fa-clock mr-1"></i>
+              {{ formatTime(result.slot.scheduled_time) }}
+            </p>
           </div>
-          
+
           <div class="text-center">
-            <div class="result-number">{{ result.result }}</div>
-            
+            <div class="text-6xl md:text-7xl font-extrabold text-yellow-500 mb-4">{{ result.result }}</div>
             <div class="mt-4 text-xs text-gray-500">
               <p v-if="result.slot.description">{{ result.slot.description }}</p>
               <p>ID: {{ result.id }}</p>

@@ -1,13 +1,18 @@
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Header -->
-    <div class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-gray-800 mb-4">
-        <i class="fas fa-list-ol text-blue-600 mr-2"></i>
-        Today's Results
-      </h1>
-      <p class="text-gray-600">{{ currentDate }}</p>
+  <!-- Hero Banner -->
+  <div class="bg-gradient-to-br from-blue-600 to-purple-700 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="text-center">
+        <h1 class="text-4xl md:text-6xl font-extrabold mb-4">
+          <i class="fas fa-list-ol text-yellow-400 mr-2"></i>
+          Today's Live Results
+        </h1>
+        <p class="text-xl md:text-2xl text-blue-100 mb-2">Real-time lottery results updated instantly as draws occur.</p>
+        <p class="text-lg text-blue-200 max-w-2xl mx-auto">Stay tuned and follow along for the latest announcements.</p>
+      </div>
     </div>
+  </div>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     <!-- Refresh Button -->
     <div class="text-center mb-8">
@@ -32,35 +37,18 @@
         <div
           v-for="result in resultsStore.todayResults"
           :key="result.id"
-          class="result-card transform hover:scale-105 transition-transform duration-200"
+          class="result-card bg-white rounded-lg shadow-lg p-6 hover:shadow-2xl transition-all duration-200"
         >
-          <div class="flex justify-between items-start mb-4">
-            <div>
-              <h3 class="text-lg font-semibold text-gray-800">{{ result.slot.title }}</h3>
-              <p class="text-sm text-gray-500">
-                <i class="fas fa-clock mr-1"></i>
-                Scheduled: {{ formatTime(result.slot.scheduled_time) }}
-              </p>
-              <p class="text-sm text-gray-500">
-                <i class="fas fa-check-circle mr-1"></i>
-                Declared: {{ formatTime(result.declared_at) }}
-              </p>
-            </div>
-            
-            <div class="flex flex-col items-end space-y-2">
-              <span v-if="result.is_auto" class="badge badge-info">
-                <i class="fas fa-robot mr-1"></i>
-                Auto
-              </span>
-              <span v-if="result.locked" class="badge badge-warning">
-                <i class="fas fa-lock mr-1"></i>
-                Locked
-              </span>
-            </div>
+          <div class="text-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">{{ result.slot.title }}</h3>
+            <p class="text-sm text-gray-500">
+              <i class="fas fa-clock mr-1"></i>
+              {{ formatTime(result.slot.scheduled_time) }}
+            </p>
           </div>
           
           <div class="text-center">
-            <div class="result-number">{{ result.result }}</div>
+            <div class="result-number text-6xl md:text-7xl font-extrabold text-yellow-500 mb-4">{{ result.result }}</div>
             
             <!-- Additional Info -->
             <div class="mt-4 text-xs text-gray-500">
@@ -77,7 +65,7 @@
           Today's Summary
         </h3>
         
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
           <div class="p-4 bg-blue-50 rounded-lg">
             <div class="text-2xl font-bold text-blue-600">{{ totalSlots }}</div>
             <div class="text-sm text-gray-600">Total Slots</div>
@@ -88,10 +76,6 @@
             <div class="text-sm text-gray-600">Results Declared</div>
           </div>
           
-          <div class="p-4 bg-purple-50 rounded-lg">
-            <div class="text-2xl font-bold text-purple-600">{{ autoResults }}</div>
-            <div class="text-sm text-gray-600">Auto Generated</div>
-          </div>
           
           <div class="p-4 bg-orange-50 rounded-lg">
             <div class="text-2xl font-bold text-orange-600">{{ pendingResults }}</div>
@@ -135,27 +119,14 @@
         <div
           v-for="slot in upcomingSlots"
           :key="slot.id"
-          class="slot-card"
+          class="bg-white rounded-lg shadow-lg p-6 hover:shadow-2xl transition-all duration-200"
         >
-          <div class="flex justify-between items-center">
-            <div>
-              <h4 class="font-semibold text-gray-800">{{ slot.title }}</h4>
-              <p class="text-sm text-gray-500">
-                <i class="fas fa-clock mr-1"></i>
-                {{ formatTime(slot.scheduled_time) }}
-              </p>
-            </div>
-            
-            <div class="flex flex-col items-end space-y-1">
-              <span v-if="slot.is_auto" class="badge badge-secondary">
-                <i class="fas fa-robot mr-1"></i>
-                Auto
-              </span>
-              <span class="badge badge-warning">
-                <i class="fas fa-hourglass-half mr-1"></i>
-                Pending
-              </span>
-            </div>
+          <div class="text-center">
+            <h4 class="text-lg font-semibold text-gray-800 mb-2">{{ slot.title }}</h4>
+            <p class="text-xl text-blue-600">
+              <i class="fas fa-clock mr-1"></i>
+              {{ formatTime(slot.scheduled_time) }}
+            </p>
           </div>
         </div>
       </div>

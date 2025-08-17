@@ -28,41 +28,33 @@
       <!-- Results Grid -->
       <div class="mt-4 grid grid-cols-2 gap-4 items-stretch">
         <!-- Yesterday -->
-        <div class="text-center rounded-md p-2 relative group"
+        <div class="text-center rounded-md p-2"
              :class="primary ? 'bg-white/10 border border-white/20' : 'bg-gray-50 border border-gray-200'">
           <div class="text-[10px] tracking-wide uppercase font-semibold mb-1"
                :class="primary ? 'text-amber-200/80' : 'text-gray-500'">Yesterday</div>
-          <div class="text-2xl font-extrabold tabular-nums" :class="primary ? 'text-white drop-shadow-sm' : 'text-gray-800'">{{ prevDisplay }}</div>
+          <div class="text-2xl font-extrabold tabular-nums"
+               :class="primary ? 'text-white drop-shadow-sm' : 'text-gray-800'">
+            {{ prevDisplay }}
+          </div>
         </div>
         <!-- Today -->
-    <div class="text-center rounded-md p-2 relative"
-       :class="showTodayResult ? (primary ? 'bg-emerald-500/20 border border-emerald-400/50' : 'bg-green-50 border border-green-300') : (primary ? 'bg-white/10 border border-white/20' : 'bg-gray-50 border border-gray-200')">
+        <div class="text-center rounded-md p-2"
+             :class="primary ? 'bg-white/10 border border-white/20' : 'bg-gray-50 border border-gray-200'">
           <div class="text-[10px] tracking-wide uppercase font-semibold mb-1"
                :class="primary ? 'text-amber-200/80' : 'text-gray-500'">Today</div>
           <template v-if="showTodayResult">
-            <div class="flex flex-col items-center">
-              <div
-                class="result-bubble declared-glow"
-                :class="primary ? 'bubble-primary' : 'bubble-secondary'"
-                role="img"
-                :aria-label="`Result ${todayResult.result}`"
-              >
-                <span class="result-value">{{ todayResult.result }}</span>
-              </div>
-              <div class="text-[10px] mt-1 font-medium" :class="primary ? 'text-white/80' : 'text-gray-600'">{{ formatTime(slot.scheduled_time) }}</div>
-              <div v-if="trendIcon" class="mt-1 text-xs flex items-center gap-1" :class="trendClass">
-                <i :class="trendIcon" /> {{ trendLabel }}
-              </div>
+            <div class="text-6xl md:text-7xl font-extrabold text-yellow-500 mb-2">{{ todayResult.result }}</div>
+            <div class="text-[10px] font-medium text-gray-600">{{ formatTime(slot.scheduled_time) }}</div>
+            <div v-if="trendIcon" class="mt-1 text-xs flex items-center gap-1" :class="trendClass">
+              <i :class="trendIcon" /> {{ trendLabel }}
             </div>
           </template>
           <template v-else>
-            <div class="flex flex-col items-center">
-              <div class="result-bubble placeholder" :class="primary ? 'bubble-primary-muted' : 'bubble-secondary-muted'">
-                <i v-if="timePassed" class="fas fa-spinner-third animate-spin-slow text-white/80 text-2xl"></i>
-                <i v-else class="fas fa-clock text-white/80 text-2xl animate-pulse"></i>
-              </div>
-              <span class="text-[11px] mt-1 font-medium" :class="primary ? 'text-white/70' : 'text-gray-600'">{{ timePassed ? 'Awaiting' : 'Scheduled' }}</span>
+            <div class="text-6xl md:text-7xl text-gray-400 mb-2">
+              <i v-if="timePassed" class="fas fa-spinner animate-spin"></i>
+              <i v-else class="fas fa-clock"></i>
             </div>
+            <div class="text-xs font-medium text-gray-600">{{ timePassed ? 'Awaiting' : 'Scheduled' }}</div>
           </template>
         </div>
       </div>
@@ -269,7 +261,7 @@ export default {
 }
 /* New cooler palette aligned with site hero */
 .bubble-primary { background: linear-gradient(135deg,#6366f1 0%,#8b5cf6 55%,#ec4899 105%); }
-.bubble-secondary { background: linear-gradient(135deg,#3b82f6 0%,#6366f1 85%); }
+.bubble-secondary { background: #fbbf24; /* amber-400 flat */ }
 /* Muted placeholders (desaturated / darker) */
 .bubble-primary-muted { background: linear-gradient(135deg,#4338ca 0%,#6d28d9 90%); filter: saturate(75%) brightness(.85); }
 .bubble-secondary-muted { background: linear-gradient(135deg,#1e3a8a 0%,#4338ca 90%); filter: saturate(75%) brightness(.85); }
