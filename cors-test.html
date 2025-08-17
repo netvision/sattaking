@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CORS Test</title>
+</head>
+<body>
+    <h1>CORS Test for Satta King API</h1>
+    <button onclick="testCORS()">Test CORS</button>
+    <div id="result"></div>
+
+    <script>
+        async function testCORS() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing CORS...';
+            
+            try {
+                const response = await fetch('https://api.sattaking.app/info/status', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    mode: 'cors'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <h3 style="color: green;">✅ CORS Working!</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <h3 style="color: orange;">⚠️ API Response: ${response.status}</h3>
+                        <p>${response.statusText}</p>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h3 style="color: red;">❌ CORS Error</h3>
+                    <p>${error.message}</p>
+                    <p>Make sure to upload the CORS fixes to your server and restart the web server.</p>
+                `;
+            }
+        }
+
+        // Test login CORS
+        async function testLoginCORS() {
+            try {
+                const response = await fetch('https://api.sattaking.app/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: 'test',
+                        password: 'test'
+                    }),
+                    mode: 'cors'
+                });
+                
+                console.log('Login CORS test response:', response.status);
+            } catch (error) {
+                console.error('Login CORS error:', error);
+            }
+        }
+    </script>
+
+    <button onclick="testLoginCORS()">Test Login CORS (Check Console)</button>
+</body>
+</html>

@@ -1,0 +1,12 @@
+Need to develop a lottery app portal
+prefarably in yii2, as backend api or you suggest? and frontend in vue3? 
+i will host/deploy it on my already running ubuntu server with apache2/php
+flow is like this:
+    there will be two sections
+    one is for public where results are shown as well as other info about the plateform. ui to browes archived results of earlier days linked to calender
+    other is admin with password protected.
+    admin would define the slots, title, their time when the result is announced and the result itself.
+    result is any number between 0 to 99.
+    few slots, as decided by the admin, must automatcally/randomly declare result at their decided time, if the admin has not already input the result.
+    results, once declared and their time has elapsed can not be changed.
+    all results are saved in database, mysql.

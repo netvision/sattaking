@@ -1,0 +1,35 @@
+# IMMEDIATE CORS FIX INSTRUCTIONS
+# Run these commands on your server via SSH
+
+# 1. Backup your current config
+sudo cp /path/to/your/api/config/web.php /path/to/your/api/config/web.php.backup
+
+# 2. Edit the web.php file to remove the duplicate CORS configuration
+sudo nano /path/to/your/api/config/web.php
+
+# 3. Find and DELETE these lines (around line 42-53):
+#    'response' => [
+#        'class' => 'yii\web\Response',
+#        'on beforeSend' => function ($event) {
+#            $response = $event->sender;
+#            $response->headers->add('Access-Control-Allow-Origin', 'http://localhost:3000');
+#            $response->headers->add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+#            $response->headers->add('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+#            $response->headers->add('Access-Control-Allow-Credentials', 'true');
+#            $response->headers->add('Access-Control-Max-Age', '86400');
+#        },
+#    ],
+
+# 4. Save the file (Ctrl+X, Y, Enter in nano)
+
+# 5. Restart your web server
+sudo systemctl restart apache2
+# OR if using nginx:
+# sudo systemctl restart nginx && sudo systemctl restart php-fpm
+
+# 6. Test your frontend - the CORS error should be gone!
+
+# The issue was that CORS headers were being set twice:
+# - Once in web.php (global)
+# - Once in each controller
+# This caused duplicate 'Access-Control-Allow-Origin' headers

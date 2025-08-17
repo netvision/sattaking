@@ -1,0 +1,41 @@
+# Root ignore
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.DS_Store
+frontend/*.log
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/.env
+frontend/.env.*.local
+
+# Composer vendor (if added later)
+vendor/
+composer.lock
+
+# IDE / Editor
+.vscode/
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs & runtime
+runtime/
+frontend/runtime/
+*.log
+
+# Build artifacts
+/public/assets/*
+!web/assets/.gitignore
+
+# Coverage / reports
+coverage/
+
+# Misc
+*.swp
