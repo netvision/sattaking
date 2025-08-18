@@ -27,16 +27,16 @@
 
       <!-- Results Grid -->
       <div class="mt-4 grid grid-cols-2 gap-4 items-stretch">
-        <!-- Yesterday -->
-        <div class="text-center rounded-md p-2"
-             :class="primary ? 'bg-white/10 border border-white/20' : 'bg-gray-50 border border-gray-200'">
-          <div class="text-[10px] tracking-wide uppercase font-semibold mb-1"
-               :class="primary ? 'text-amber-200/80' : 'text-gray-500'">Yesterday</div>
-          <div class="text-2xl font-extrabold tabular-nums"
-               :class="primary ? 'text-white drop-shadow-sm' : 'text-gray-800'">
-            {{ prevDisplay }}
-          </div>
-        </div>
+     <!-- Yesterday -->
+     <div class="text-center rounded-md p-2"
+       :class="primary ? 'bg-white/10 border border-white/20' : 'bg-gray-50 border border-gray-200'">
+    <div class="text-[10px] tracking-wide uppercase font-semibold mb-1"
+      :class="primary ? 'text-amber-200/80' : 'text-gray-500'">Yesterday</div>
+    <div class="text-6xl md:text-7xl font-extrabold mb-2"
+      :class="primary ? 'text-white/80' : 'text-gray-400'">
+      {{ prevDisplay }}
+    </div>
+     </div>
         <!-- Today -->
         <div class="text-center rounded-md p-2"
              :class="primary ? 'bg-white/10 border border-white/20' : 'bg-gray-50 border border-gray-200'">
@@ -45,9 +45,6 @@
           <template v-if="showTodayResult">
             <div class="text-6xl md:text-7xl font-extrabold text-yellow-500 mb-2">{{ todayResult.result }}</div>
             <div class="text-[10px] font-medium text-gray-600">{{ formatTime(slot.scheduled_time) }}</div>
-            <div v-if="trendIcon" class="mt-1 text-xs flex items-center gap-1" :class="trendClass">
-              <i :class="trendIcon" /> {{ trendLabel }}
-            </div>
           </template>
           <template v-else>
             <div class="text-6xl md:text-7xl text-gray-400 mb-2">

@@ -176,6 +176,7 @@ import { onMounted, ref, computed } from 'vue'
 import { useResultsStore } from '@/stores/results'
 import { useSlotsStore } from '@/stores/slots'
 import { formatTime, formatDateTime } from '@/utils/dateTime'
+import { format } from 'date-fns'
 import SlotCard from '@/components/SlotCard.vue'
 
 export default {
@@ -187,12 +188,12 @@ export default {
     const todaySlotsCount = ref(0)
 
     onMounted(async () => {
-      // Fetch today's results and slots
+      // Fetch today's results, slots, and a broader latest results list for historical lookup
       await Promise.all([
         resultsStore.fetchTodayResults(),
-        slotsStore.fetchTodaySlots()
+        slotsStore.fetchTodaySlots(),
+        resultsStore.fetchLatestResults(50)
       ])
-      
       todaySlotsCount.value = slotsStore.todaySlots.length
     })
 
@@ -203,17 +204,18 @@ export default {
     })
 
     const prevResultsBySlot = computed(() => {
-      // Build a simple map of previous day results using latestResults fetch is not present, so fallback '--'
-      // If backend provides previous result per slot in todaySlots, you can adapt this
       const map = {}
-      // If resultsStore.latestResults contains historical entries, try to pick previous day
-      if (resultsStore.latestResults && resultsStore.latestResults.length) {
-        // naive approach: find latest result for each slot that's not today's
-        resultsStore.latestResults.forEach(r => {
-          if (!map[r.slot_id]) {
-            map[r.slot_id] = r.result
-          }
-        })
+      if (!resultsStore.latestResults || !resultsStore.latestResults.length) return map
+
+      const todayKey = format(new Date(), 'yyyy-MM-dd')
+
+      // We traverse latestResults (assumed newest first) and pick the first NON-today result per slot
+      for (const r of resultsStore.latestResults) {
+        if (map[r.slot_id]) continue
+        const declared = r.declared_at || r.created_at || ''
+        const datePart = declared.slice(0, 10) // assumes YYYY-MM-DD*
+        if (datePart === todayKey) continue // skip today's entries
+        map[r.slot_id] = r.result
       }
       return map
     })
