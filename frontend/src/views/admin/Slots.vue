@@ -22,15 +22,7 @@
     <!-- Filters -->
     <div class="bg-white rounded-lg shadow-md p-4 mb-6">
       <div class="flex flex-wrap items-center gap-4">
-        <div>
-          <label class="text-sm font-medium text-gray-700 mr-2">Filter by date:</label>
-          <input
-            v-model="filters.date"
-            type="date"
-            class="form-input w-auto"
-            @change="applyFilters"
-          />
-        </div>
+
         
         <div>
           <label class="text-sm font-medium text-gray-700 mr-2">Status:</label>
@@ -54,85 +46,86 @@
     </div>
 
     <!-- Slots Table -->
-    <div v-else class="bg-white rounded-lg shadow-md overflow-hidden">
-      <table class="table">
+    <div v-else class="bg-white rounded-2xl shadow-lg overflow-x-auto p-0 md:p-4">
+      <table class="min-w-full divide-y divide-gray-200">
         <thead>
-          <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Scheduled Time</th>
-            <th>Auto Generate</th>
-            <th>Status</th>
-            <th>Has Result</th>
-            <th>Actions</th>
+          <tr class="bg-gradient-to-r from-blue-50 to-blue-100">
+            <!-- <th class="px-4 py-3 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">ID</th> -->
+            <th class="px-4 py-3 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Title</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Scheduled Time</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Auto Generate</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Status</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Has Result</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
-        <tbody>
-          <tr v-for="slot in slotsStore.allSlots" :key="slot.id">
-            <td class="font-medium">{{ slot.id }}</td>
-            <td>
-              <div>
-                <div class="font-medium text-gray-900">{{ slot.title }}</div>
-                <div v-if="slot.description" class="text-sm text-gray-500">{{ slot.description }}</div>
+        <tbody class="divide-y divide-gray-100">
+          <tr v-for="(slot, idx) in slotsStore.allSlots" :key="slot.id" :class="idx % 2 === 0 ? 'bg-white' : 'bg-blue-50'" class="transition hover:bg-blue-100">
+            <!-- <td class="px-4 py-3 font-semibold text-gray-700">{{ slot.id }}</td> -->
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-2">
+                <div class="font-semibold text-gray-900 text-base">{{ slot.title }}</div>
+                <span v-if="slot.is_active" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 ml-1">
+                  <i class="fas fa-calendar-alt mr-1"></i> Daily
+                </span>
               </div>
+              <div v-if="slot.description" class="text-xs text-gray-500 mt-1">{{ slot.description }}</div>
             </td>
-            <td>
+            <td class="px-4 py-3">
               <div class="text-sm">
-                <div class="text-gray-900">Daily</div>
+                <div class="text-blue-700 font-medium">Daily</div>
                 <div class="text-gray-500">{{ formatTime(slot.scheduled_time) }}</div>
               </div>
             </td>
-            <td>
-              <span v-if="slot.is_auto" class="badge badge-info">
+            <td class="px-4 py-3">
+              <span v-if="slot.is_auto" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
                 <i class="fas fa-robot mr-1"></i>
                 Auto
               </span>
-              <span v-else class="badge badge-secondary">
+              <span v-else class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700">
                 <i class="fas fa-hand-paper mr-1"></i>
                 Manual
               </span>
             </td>
-            <td>
-              <span v-if="slot.is_active" class="badge badge-success">
+            <td class="px-4 py-3">
+              <span v-if="slot.is_active" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
                 <i class="fas fa-check-circle mr-1"></i>
                 Active
               </span>
-              <span v-else class="badge badge-danger">
+              <span v-else class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
                 <i class="fas fa-times-circle mr-1"></i>
                 Inactive
               </span>
             </td>
-            <td>
-              <span v-if="slot.has_result_today" class="badge badge-success">
+            <td class="px-4 py-3">
+              <span v-if="slot.has_result_today" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
                 <i class="fas fa-check mr-1"></i>
                 Yes
               </span>
-              <span v-else class="badge badge-warning">
+              <span v-else class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">
                 <i class="fas fa-clock mr-1"></i>
                 Pending
               </span>
             </td>
-            <td>
+            <td class="px-4 py-3">
               <div class="flex items-center space-x-2">
                 <button
                   @click="editSlot(slot)"
-                  class="text-blue-600 hover:text-blue-900"
+                  class="rounded-full p-2 bg-blue-50 hover:bg-blue-200 text-blue-600 hover:text-blue-900 transition"
                   title="Edit Slot"
                 >
                   <i class="fas fa-edit"></i>
                 </button>
-                
                 <button
                   @click="toggleSlotStatus(slot)"
-                  :class="slot.is_active ? 'text-orange-600 hover:text-orange-900' : 'text-green-600 hover:text-green-900'"
+                  :class="slot.is_active ? 'rounded-full p-2 bg-orange-50 hover:bg-orange-200 text-orange-600 hover:text-orange-900' : 'rounded-full p-2 bg-green-50 hover:bg-green-200 text-green-600 hover:text-green-900'"
                   :title="slot.is_active ? 'Deactivate Slot' : 'Activate Slot'"
                 >
                   <i :class="slot.is_active ? 'fas fa-pause' : 'fas fa-play'"></i>
                 </button>
-                
                 <button
                   @click="deleteSlot(slot)"
-                  class="text-red-600 hover:text-red-900"
+                  class="rounded-full p-2 bg-red-50 hover:bg-red-200 text-red-600 hover:text-red-900 transition"
                   title="Delete Slot"
                   :disabled="slot.has_result_today"
                 >
@@ -158,78 +151,72 @@
 
     <!-- Create/Edit Slot Modal -->
     <div v-if="showCreateModal || showEditModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" @click="closeModals">
-      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white" @click.stop>
+      <div class="relative top-20 mx-auto w-full max-w-md p-0 md:p-6 rounded-2xl shadow-2xl bg-white border border-blue-100" @click.stop>
         <div class="mt-3">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">
-            <i class="fas fa-clock mr-2"></i>
+          <h3 class="text-xl font-bold text-blue-700 mb-6 flex items-center">
+            <i class="fas fa-clock mr-2 text-blue-500"></i>
             {{ showCreateModal ? 'Create New Slot' : 'Edit Slot' }}
           </h3>
-          
-          <form @submit.prevent="submitSlot">
-            <div class="mb-4">
-              <label class="form-label">Title *</label>
+          <form @submit.prevent="submitSlot" class="space-y-5">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1 tracking-wide">Title <span class="text-red-500">*</span></label>
               <input
                 v-model="slotForm.title"
                 type="text"
-                class="form-input"
-                :class="{ 'border-red-500': formErrors.title }"
+                class="w-full rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-gray-50 px-4 py-3 text-base text-gray-800 placeholder-gray-400 shadow-sm transition-all duration-150"
+                :class="{ 'border-red-500 ring-red-100': formErrors.title }"
                 placeholder="e.g., Morning King"
                 required
               />
-              <p v-if="formErrors.title" class="form-error">{{ formErrors.title }}</p>
+              <p v-if="formErrors.title" class="text-xs text-red-500 mt-1">{{ formErrors.title }}</p>
             </div>
-            
-            <div class="mb-4">
-              <label class="form-label">Scheduled Time *</label>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1 tracking-wide">Scheduled Time <span class="text-red-500">*</span></label>
               <input
                 v-model="slotForm.scheduled_time"
                 type="time"
-                class="form-input"
-                :class="{ 'border-red-500': formErrors.scheduled_time }"
+                class="w-full rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-gray-50 px-4 py-3 text-base text-gray-800 placeholder-gray-400 shadow-sm transition-all duration-150"
+                :class="{ 'border-red-500 ring-red-100': formErrors.scheduled_time }"
                 required
               />
-              <p v-if="formErrors.scheduled_time" class="form-error">{{ formErrors.scheduled_time }}</p>
+              <p v-if="formErrors.scheduled_time" class="text-xs text-red-500 mt-1">{{ formErrors.scheduled_time }}</p>
               <p class="text-xs text-gray-500 mt-1">This slot will run daily at this time</p>
             </div>
-            
-            <div class="mb-4">
-              <label class="form-label">Description</label>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1 tracking-wide">Description</label>
               <textarea
                 v-model="slotForm.description"
-                class="form-input"
+                class="w-full rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-gray-50 px-4 py-3 text-base text-gray-800 placeholder-gray-400 shadow-sm transition-all duration-150"
                 rows="3"
                 placeholder="Optional description for this slot"
               ></textarea>
             </div>
-            
-            <div class="mb-4">
-              <div class="flex items-center space-x-4">
-                <label class="flex items-center">
+            <div>
+              <div class="flex items-center gap-6">
+                <label class="flex items-center cursor-pointer">
                   <input
                     v-model="slotForm.is_auto"
                     type="checkbox"
-                    class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                    class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-400 border-gray-300"
                   />
                   <span class="ml-2 text-sm font-medium text-gray-700">Auto Generate Result</span>
                 </label>
-                
-                <label class="flex items-center">
+                <label class="flex items-center cursor-pointer">
                   <input
                     v-model="slotForm.is_active"
                     type="checkbox"
-                    class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                    class="form-checkbox h-5 w-5 text-green-600 rounded focus:ring-green-400 border-gray-300"
                   />
                   <span class="ml-2 text-sm font-medium text-gray-700">Active</span>
                 </label>
               </div>
             </div>
-            
-            <div class="flex justify-end space-x-3">
-              <button type="button" @click="closeModals" class="btn btn-outline">
+            <div class="flex justify-end gap-3 pt-2">
+              <button type="button" @click="closeModals" class="px-5 py-2 rounded-lg border border-blue-200 bg-white text-blue-700 font-semibold hover:bg-blue-50 transition">
                 Cancel
               </button>
-              <button type="submit" class="btn btn-primary" :disabled="slotsStore.loading">
-                <i class="fas fa-save mr-2"></i>
+              <button type="submit" class="px-5 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition flex items-center gap-2" :disabled="slotsStore.loading">
+                <i class="fas fa-save"></i>
                 {{ showCreateModal ? 'Create Slot' : 'Update Slot' }}
               </button>
             </div>

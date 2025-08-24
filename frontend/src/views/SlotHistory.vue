@@ -30,14 +30,14 @@
         <div class="text-gray-600">No historical results found for this slot.</div>
       </div>
 
-      <div v-else class="grid gap-4">
-        <div v-for="r in results" :key="r.id" class="result-card flex items-center justify-between p-4">
+      <div v-else class="space-y-4">
+        <div v-for="r in results" :key="r.id" class="bg-white rounded-lg shadow p-4 flex items-center justify-between">
           <div>
-            <div class="text-sm text-gray-500">{{ formatDate(r.declared_at) }}</div>
-            <div class="text-xl font-bold">{{ r.result }}</div>
+            <div class="text-sm text-gray-500 mb-1">{{ formatDate(r.declared_at) }}</div>
+            <div class="text-2xl md:text-3xl font-extrabold text-yellow-500">{{ r.result }}</div>
           </div>
-          <div class="text-right text-sm text-gray-500">
-            <div v-if="r.locked">Final</div>
+          <div class="text-sm text-gray-500">
+            <span v-if="r.locked" class="inline-block bg-gray-100 px-2 py-1 rounded-full">Final</span>
           </div>
         </div>
 
@@ -71,9 +71,11 @@ export default {
     const fetchSlot = async () => {
       try {
         const resp = await slotsAPI.getById(slotId)
-        if (resp.data && resp.data.success) {
-          slotTitle.value = resp.data.data.title
-          slotScheduled.value = resp.data.data.scheduled_time
+        // API may return wrapper { success, data } or raw slot object directly in resp.data
+        const payload = resp.data && resp.data.success ? resp.data.data : resp.data
+        if (payload) {
+          slotTitle.value = payload.title || `Slot ${slotId}`
+          slotScheduled.value = payload.scheduled_time || ''
         }
       } catch (e) {
         console.error('Failed to fetch slot details', e)
@@ -112,14 +114,21 @@ export default {
 
     const formatDate = (dt) => {
       try {
-        // declared_at may be ISO string; show date + time succinctly
-        const d = new Date(dt)
-        return d.toLocaleString()
+  // declared_at may be ISO string; show only date (D/M/YYYY)
+  const d = new Date(dt)
+  if (isNaN(d.getTime())) return dt
+  const day = d.getDate()
+  const month = d.getMonth() + 1
+  const year = d.getFullYear()
+  return `${day}/${month}/${year}`
       } catch (e) { return dt }
     }
 
     onMounted(async () => {
-      if (!slotId) return
+      // Fetch slot details and history regardless of slotId type
+      if (!slotId) {
+        console.warn('SlotHistory: missing slotId in route params')
+      }
       await fetchSlot()
       await fetchResults()
     })

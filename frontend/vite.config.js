@@ -13,6 +13,15 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
+    proxy: {
+      '/api': {
+        target: 'https://api.sattaking.app',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+      // Optional: proxy websockets or other paths if needed
+    },
   },
   build: {
     outDir: 'dist',

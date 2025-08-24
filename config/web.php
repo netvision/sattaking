@@ -74,6 +74,7 @@ $config = [
                 'GET results/today' => 'result/today',
                 'GET results/archive' => 'result/archive',
                 'GET results/latest' => 'result/latest',
+                'GET results/month' => 'result/month',
                 'POST results' => 'result/create',
                 'PUT results/<id:\d+>' => 'result/update',
                 'POST results/<id:\d+>/lock' => 'result/lock',

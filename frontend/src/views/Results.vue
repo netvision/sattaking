@@ -33,9 +33,36 @@
 
     <!-- Results Grid -->
     <div v-else-if="resultsStore.todayResults.length > 0">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <!-- Summary Stats (keep at top) -->
+      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">
+          <i class="fas fa-chart-bar mr-2"></i>
+          Today's Summary
+        </h3>
+        
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+          <div class="p-4 bg-blue-50 rounded-lg">
+            <div class="text-2xl font-bold text-blue-600">{{ totalSlots }}</div>
+            <div class="text-sm text-gray-600">Total Slots</div>
+          </div>
+          
+          <div class="p-4 bg-green-50 rounded-lg">
+            <div class="text-2xl font-bold text-green-600">{{ resultsStore.todayResults.length }}</div>
+            <div class="text-sm text-gray-600">Results Declared</div>
+          </div>
+          
+          
+          <div class="p-4 bg-orange-50 rounded-lg">
+            <div class="text-2xl font-bold text-orange-600">{{ pendingResults }}</div>
+            <div class="text-sm text-gray-600">Pending</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Declared Results -->
+      <div v-if="declaredResults.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <div
-          v-for="result in resultsStore.todayResults"
+          v-for="result in declaredResults"
           :key="result.id"
           class="result-card bg-white rounded-lg shadow-lg p-6 hover:shadow-2xl transition-all duration-200"
         >
@@ -58,28 +85,19 @@
         </div>
       </div>
 
-      <!-- Summary Stats -->
-      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <!-- Passed but not declared (pending) -->
+      <div v-if="passedButNotDeclared.length > 0" class="bg-white rounded-lg shadow-md p-6 mb-8">
         <h3 class="text-lg font-semibold text-gray-800 mb-4">
-          <i class="fas fa-chart-bar mr-2"></i>
-          Today's Summary
+          <i class="fas fa-hourglass-half mr-2"></i>
+          Pending Results (scheduled time passed)
         </h3>
-        
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-          <div class="p-4 bg-blue-50 rounded-lg">
-            <div class="text-2xl font-bold text-blue-600">{{ totalSlots }}</div>
-            <div class="text-sm text-gray-600">Total Slots</div>
-          </div>
-          
-          <div class="p-4 bg-green-50 rounded-lg">
-            <div class="text-2xl font-bold text-green-600">{{ resultsStore.todayResults.length }}</div>
-            <div class="text-sm text-gray-600">Results Declared</div>
-          </div>
-          
-          
-          <div class="p-4 bg-orange-50 rounded-lg">
-            <div class="text-2xl font-bold text-orange-600">{{ pendingResults }}</div>
-            <div class="text-sm text-gray-600">Pending</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div v-for="slot in passedButNotDeclared" :key="slot.id" class="bg-white rounded-lg shadow-lg p-6">
+            <div class="text-center">
+              <h4 class="text-lg font-semibold text-gray-800 mb-2">{{ slot.title }}</h4>
+              <p class="text-xl text-gray-600"><i class="fas fa-clock mr-1"></i>{{ formatTime(slot.scheduled_time) }}</p>
+              <div class="text-sm text-gray-500 mt-2">Awaiting result</div>
+            </div>
           </div>
         </div>
       </div>
@@ -160,9 +178,30 @@ export default {
       return totalSlots.value - resultsStore.todayResults.length
     })
 
-    const upcomingSlots = computed(() => {
+    // Declared results (results reported for today)
+    const declaredResults = computed(() => resultsStore.todayResults)
+
+    // Slots which had scheduled_time <= now and do not have declared results (pending / passed)
+    const passedButNotDeclared = computed(() => {
+      const now = new Date()
       return slotsStore.todaySlots.filter(slot => {
-        return !resultsStore.todayResults.some(result => result.slot_id === slot.id)
+        const hasResult = resultsStore.todayResults.some(r => r.slot_id === slot.id)
+        if (hasResult) return false
+        const scheduled = new Date()
+        const [h, m] = slot.scheduled_time.split(':')
+        scheduled.setHours(parseInt(h), parseInt(m), 0, 0)
+        return scheduled <= now
+      })
+    })
+
+    // Upcoming slots (scheduled in the future)
+    const upcomingSlots = computed(() => {
+      const now = new Date()
+      return slotsStore.todaySlots.filter(slot => {
+        const scheduled = new Date()
+        const [h, m] = slot.scheduled_time.split(':')
+        scheduled.setHours(parseInt(h), parseInt(m), 0, 0)
+        return scheduled > now && !resultsStore.todayResults.some(r => r.slot_id === slot.id)
       })
     })
 
@@ -185,7 +224,9 @@ export default {
       totalSlots,
       autoResults,
       pendingResults,
-      upcomingSlots,
+  declaredResults,
+  passedButNotDeclared,
+  upcomingSlots,
       formatTime,
       refreshResults
     }

@@ -1,189 +1,135 @@
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-8">
+    <!-- Header + Actions -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-gray-800">
-          <i class="fas fa-users text-blue-600 mr-2"></i>
-          Manage Users
+        <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+          <i class="fas fa-users text-blue-600"></i>
+          <span>Manage Users</span>
         </h1>
-        <p class="text-gray-600 mt-2">View and manage admin users</p>
+        <p class="text-gray-600 mt-1">View, search and manage admin users</p>
       </div>
-      
-      <button
-        @click="showCreateUserModal = true"
-        class="btn btn-primary"
-      >
-        <i class="fas fa-user-plus mr-2"></i>
-        Add New User
-      </button>
-    </div>
 
-    <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      <div class="bg-white rounded-lg shadow-md p-4 text-center">
-        <h3 class="text-2xl font-bold text-blue-600">{{ totalUsers }}</h3>
-        <p class="text-gray-600">Total Users</p>
-      </div>
-      
-      <div class="bg-white rounded-lg shadow-md p-4 text-center">
-        <h3 class="text-2xl font-bold text-green-600">{{ activeUsers }}</h3>
-        <p class="text-gray-600">Active Users</p>
-      </div>
-      
-      <div class="bg-white rounded-lg shadow-md p-4 text-center">
-        <h3 class="text-2xl font-bold text-orange-600">{{ inactiveUsers }}</h3>
-        <p class="text-gray-600">Inactive Users</p>
-      </div>
-      
-      <div class="bg-white rounded-lg shadow-md p-4 text-center">
-        <h3 class="text-2xl font-bold text-purple-600">{{ adminUsers }}</h3>
-        <p class="text-gray-600">Admins</p>
-      </div>
-    </div>
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center bg-white rounded-lg shadow-sm px-3 py-2">
+          <i class="fas fa-search text-gray-400 mr-2"></i>
+          <input v-model="filters.search" @input="applyFilters" placeholder="Search users..." class="outline-none text-sm w-48" />
+        </div>
 
-    <!-- Filters and Search -->
-    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
-      <div class="flex flex-wrap items-center gap-4">
-        <div>
-          <label class="text-sm font-medium text-gray-700 mr-2">Search:</label>
-          <input
-            v-model="filters.search"
-            type="text"
-            placeholder="Search users..."
-            class="form-input w-64"
-            @input="applyFilters"
-          />
-        </div>
-        
-        <div>
-          <label class="text-sm font-medium text-gray-700 mr-2">Role:</label>
-          <select v-model="filters.role" class="form-input w-auto" @change="applyFilters">
-            <option value="">All Roles</option>
-            <option value="admin">Admin</option>
-            <option value="user">User</option>
-          </select>
-        </div>
-        
-        <div>
-          <label class="text-sm font-medium text-gray-700 mr-2">Status:</label>
-          <select v-model="filters.status" class="form-input w-auto" @change="applyFilters">
-            <option value="">All</option>
+        <div class="hidden sm:flex items-center gap-2">
+          <select v-model="filters.status" @change="applyFilters" class="form-input text-sm">
+            <option value="">All Status</option>
             <option value="1">Active</option>
             <option value="0">Inactive</option>
           </select>
         </div>
-        
-        <button @click="resetFilters" class="btn btn-outline">
-          <i class="fas fa-times mr-2"></i>
+
+        <button @click="resetFilters" class="btn btn-outline hidden sm:inline-flex">
           Clear
+        </button>
+
+        <button @click="showCreateUserModal = true" class="btn btn-primary">
+          <i class="fas fa-user-plus mr-2"></i>
+          Add User
         </button>
       </div>
     </div>
 
-    <!-- Loading State -->
+    <!-- Summary chips -->
+    <div class="flex flex-wrap gap-3 mb-6">
+      <div class="px-4 py-2 bg-white rounded-lg shadow-sm text-sm">
+        <strong class="text-blue-600">{{ totalUsers }}</strong>
+        <span class="text-gray-500 ml-2">Total</span>
+      </div>
+      <div class="px-4 py-2 bg-white rounded-lg shadow-sm text-sm">
+        <strong class="text-green-600">{{ activeUsers }}</strong>
+        <span class="text-gray-500 ml-2">Active</span>
+      </div>
+      <div class="px-4 py-2 bg-white rounded-lg shadow-sm text-sm">
+        <strong class="text-orange-600">{{ inactiveUsers }}</strong>
+        <span class="text-gray-500 ml-2">Inactive</span>
+      </div>
+  <!-- role counts removed -->
+    </div>
+
+    <!-- Loading -->
     <div v-if="loading" class="flex justify-center py-12">
       <div class="spinner w-12 h-12"></div>
     </div>
 
-    <!-- Users Table -->
-    <div v-else class="bg-white rounded-lg shadow-md overflow-hidden">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>User Details</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Last Login</th>
-            <th>Created</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="user in filteredUsers" :key="user.id">
-            <td class="font-medium">{{ user.id }}</td>
-            <td>
-              <div class="flex items-center">
-                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                  <i class="fas fa-user text-blue-600"></i>
+    <!-- Users: cards on small, table on md+ -->
+    <div v-else>
+      <!-- Cards for small screens -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
+        <div v-for="user in filteredUsers" :key="user.id" class="bg-white p-4 rounded-lg shadow-sm">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                <i class="fas fa-user"></i>
+              </div>
+              <div>
+                <div class="font-medium text-gray-900">{{ user.username }}</div>
+                <div class="text-sm text-gray-500">{{ user.email || '—' }}</div>
+              </div>
+            </div>
+            <div class="text-right">
+                <div class="text-sm font-semibold" :class="user.status === 1 ? 'text-green-600' : 'text-gray-500'">
+                {{ user.status === 1 ? 'Active' : 'Inactive' }}
+              </div>
+            </div>
+          </div>
+
+            <div class="mt-3 flex items-center justify-between">
+            <div class="text-sm text-gray-500">Last: {{ user.last_login ? formatTime(user.last_login) : 'Never' }}</div>
+            <div class="flex items-center gap-3">
+              <button @click="editUser(user)" class="text-blue-600 hover:text-blue-900" title="Edit"><i class="fas fa-edit"></i></button>
+              <button v-if="user.id !== currentUserId" @click="toggleUserStatus(user)" :class="user.status===1 ? 'text-red-600' : 'text-green-600'" :title="user.status===1 ? 'Deactivate' : 'Activate'"><i :class="user.status===1 ? 'fas fa-user-slash' : 'fas fa-user-check'"></i></button>
+              <button @click="resetPassword(user)" class="text-orange-600 hover:text-orange-900" title="Reset Password"><i class="fas fa-key"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table for md+ -->
+      <div class="hidden md:block bg-white rounded-lg shadow-md overflow-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50 sticky top-0">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Login</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+              <th class="px-6 py-3"></th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr v-for="user in filteredUsers" :key="user.id">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center mr-3 text-blue-600"><i class="fas fa-user"></i></div>
+                  <div>
+                    <div class="text-sm font-medium text-gray-900">{{ user.username }}</div>
+                    <div class="text-sm text-gray-500">{{ user.email || '—' }}</div>
+                  </div>
                 </div>
-                <div>
-                  <div class="font-medium text-gray-900">{{ user.username }}</div>
-                  <div v-if="user.email" class="text-sm text-gray-500">{{ user.email }}</div>
-                </div>
-              </div>
-            </td>
-            <td>
-              <span v-if="user.role === 'admin'" class="badge badge-primary">
-                <i class="fas fa-crown mr-1"></i>
-                Admin
-              </span>
-              <span v-else class="badge badge-secondary">
-                <i class="fas fa-user mr-1"></i>
-                User
-              </span>
-            </td>
-            <td>
-              <span v-if="user.status === 1" class="badge badge-success">
-                <i class="fas fa-check-circle mr-1"></i>
-                Active
-              </span>
-              <span v-else class="badge badge-danger">
-                <i class="fas fa-times-circle mr-1"></i>
-                Inactive
-              </span>
-            </td>
-            <td>
-              <div v-if="user.last_login" class="text-sm">
-                <div>{{ formatDate(user.last_login) }}</div>
-                <div class="text-gray-500">{{ formatTime(user.last_login) }}</div>
-              </div>
-              <span v-else class="text-gray-400">Never</span>
-            </td>
-            <td>
-              <div class="text-sm">
-                <div>{{ formatDate(user.created_at) }}</div>
-                <div class="text-gray-500">{{ formatTime(user.created_at) }}</div>
-              </div>
-            </td>
-            <td>
-              <div class="flex items-center space-x-2">
-                <button
-                  @click="editUser(user)"
-                  class="text-blue-600 hover:text-blue-900"
-                  title="Edit User"
-                >
-                  <i class="fas fa-edit"></i>
-                </button>
-                
-                <button
-                  v-if="user.id !== currentUserId"
-                  @click="toggleUserStatus(user)"
-                  :class="user.status === 1 ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'"
-                  :title="user.status === 1 ? 'Deactivate User' : 'Activate User'"
-                >
-                  <i :class="user.status === 1 ? 'fas fa-user-slash' : 'fas fa-user-check'"></i>
-                </button>
-                
-                <button
-                  @click="resetPassword(user)"
-                  class="text-orange-600 hover:text-orange-900"
-                  title="Reset Password"
-                >
-                  <i class="fas fa-key"></i>
-                </button>
-                
-                <span v-if="user.id === currentUserId" class="text-gray-400" title="Current User">
-                  <i class="fas fa-user-circle"></i>
-                </span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      
-      <!-- Empty State -->
+              </td>
+              <!-- role column removed -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span :class="user.status===1 ? 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800' : 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800'">{{ user.status===1 ? 'Active' : 'Inactive' }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.last_login ? formatDate(user.last_login) + ' ' + formatTime(user.last_login) : 'Never' }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ formatDate(user.created_at) }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button @click="editUser(user)" class="text-blue-600 hover:text-blue-900 mr-3" title="Edit"><i class="fas fa-edit"></i></button>
+                <button v-if="user.id !== currentUserId" @click="toggleUserStatus(user)" :class="user.status===1 ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'" title="Toggle status"><i :class="user.status===1 ? 'fas fa-user-slash' : 'fas fa-user-check'"></i></button>
+                <button @click="resetPassword(user)" class="text-orange-600 hover:text-orange-900 ml-3" title="Reset Password"><i class="fas fa-key"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty state -->
       <div v-if="filteredUsers.length === 0" class="text-center py-12">
         <i class="fas fa-users text-4xl text-gray-400 mb-4"></i>
         <h3 class="text-lg font-medium text-gray-600 mb-2">No users found</h3>
@@ -242,15 +188,7 @@
               <p v-if="formErrors.password" class="form-error">{{ formErrors.password }}</p>
             </div>
             
-            <!-- Role field commented out - not in current database schema
-            <div class="mb-4">
-              <label class="form-label">Role *</label>
-              <select v-model="userForm.role" class="form-input" required>
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
-            -->
+            <!-- role field removed from frontend form -->
             
             <div class="mb-4">
               <label class="form-label flex items-center">
@@ -347,7 +285,6 @@ export default {
     
     const filters = reactive({
       search: '',
-      role: '',
       status: ''
     })
     
@@ -355,7 +292,6 @@ export default {
       username: '',
       email: '',
       password: '',
-      role: 'user',
       status: true
     })
     
@@ -377,7 +313,7 @@ export default {
     const totalUsers = computed(() => users.value.length)
     const activeUsers = computed(() => users.value.filter(u => u.status === 1).length)
     const inactiveUsers = computed(() => users.value.filter(u => u.status === 0).length)
-    const adminUsers = computed(() => users.value.filter(u => u.role === 'admin').length)
+  // role-related counts removed
 
     const filteredUsers = computed(() => {
       let filtered = users.value
@@ -390,9 +326,7 @@ export default {
         )
       }
 
-      if (filters.role) {
-        filtered = filtered.filter(user => user.role === filters.role)
-      }
+  // role filter removed
 
       if (filters.status !== '') {
         filtered = filtered.filter(user => user.status === parseInt(filters.status))
@@ -415,7 +349,7 @@ export default {
 
     const resetFilters = () => {
       filters.search = ''
-      filters.role = ''
+  // role filter removed
       filters.status = ''
     }
 
@@ -423,7 +357,7 @@ export default {
       userForm.username = ''
       userForm.email = ''
       userForm.password = ''
-      userForm.role = 'user'
+      // role removed from frontend form
       userForm.status = true
       
       // Clear errors
@@ -436,7 +370,7 @@ export default {
       editingUser.value = user
       userForm.username = user.username
       userForm.email = user.email || ''
-      userForm.role = user.role
+  // role removed
       userForm.status = user.status === 1
     }
 
@@ -458,7 +392,6 @@ export default {
         const userData = {
           username: userForm.username,
           // email: userForm.email || null, // Comment out - not in database schema
-          // role: userForm.role, // Comment out - not in database schema  
           status: userForm.status ? 1 : 0  // Use 1/0 instead of true/false
         }
 
@@ -642,10 +575,9 @@ export default {
       passwordForm,
       formErrors,
       currentUserId,
-      totalUsers,
-      activeUsers,
-      inactiveUsers,
-      adminUsers,
+  totalUsers,
+  activeUsers,
+  inactiveUsers,
       filteredUsers,
       formatDate,
       formatTime,

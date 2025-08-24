@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // API configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.sattaking.app'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 
 // Create axios instance
 const api = axios.create({
@@ -49,6 +49,7 @@ export const authAPI = {
 export const resultsAPI = {
   getToday: () => api.get('/results/today'),
   getArchive: (date) => api.get('/results/archive', { params: { date } }),
+  getMonth: (month) => api.get('/results/month', { params: { month } }),
   getLatest: (limit = 10) => api.get('/results/latest', { params: { limit } }),
   getBySlot: (slotId, params = {}) => api.get('/results', { params: { slot_id: slotId, ...params } }),
   create: (data) => api.post('/results', data),

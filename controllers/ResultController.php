@@ -37,7 +37,7 @@ class ResultController extends Controller
         // Authentication - public can view, admin can modify
         $behaviors['authenticator'] = [
             'class' => HttpBearerAuth::class,
-            'except' => ['index', 'view', 'today', 'archive', 'latest', 'options'],
+            'except' => ['index', 'view', 'today', 'archive', 'latest', 'month', 'options'],
         ];
 
         return $behaviors;
@@ -62,19 +62,23 @@ class ResultController extends Controller
     {
         $query = Result::find()->with('slot');
 
-        // Filter by date
-        $date = Yii::$app->request->get('date');
-        if ($date) {
-            $query = Result::findByDate($date);
-        } else {
-            // Default to today's results
-            $query = Result::findTodayResults();
-        }
-
-        // Optional: filter by slot_id (used by slot history page)
+        // Filter by slot if provided (slot history)
         $slotId = Yii::$app->request->get('slot_id');
-        if ($slotId !== null) {
-            $query = $query->andWhere(['slot_id' => (int)$slotId]);
+        if ($slotId !== null && !Yii::$app->request->get('date')) {
+            // Return all results for this slot
+            $query = Result::find()->with('slot')->andWhere(['slot_id' => (int)$slotId]);
+        } else {
+            // Filter by date if provided
+            $date = Yii::$app->request->get('date');
+            if ($date) {
+                $query = Result::findByDate($date);
+                if ($slotId !== null) {
+                    $query = $query->andWhere(['slot_id' => (int)$slotId]);
+                }
+            } else {
+                // Default to today's results
+                $query = Result::findTodayResults();
+            }
         }
 
         $results = $query->all();
@@ -100,19 +104,33 @@ class ResultController extends Controller
      */
     public function actionToday()
     {
-        $results = Result::findTodayResults()->all();
+        try {
+            $results = Result::findTodayResults()->all();
 
-        $data = [];
-        foreach ($results as $result) {
-            $resultData = $result->toArray();
-            $resultData['slot'] = $result->slot->toArray();
-            $data[] = $resultData;
+            $data = [];
+            foreach ($results as $result) {
+                // Ensure locked is up-to-date based on slot scheduled time
+                if ($result->slot && $result->slot->isTimePassed() && !$result->locked) {
+                    $result->locked = 1;
+                    $result->save(false, ['locked']);
+                }
+                $resultData = $result->toArray();
+                $resultData['slot'] = $result->slot ? $result->slot->toArray() : null;
+                $data[] = $resultData;
+            }
+
+            return [
+                'success' => true,
+                'data' => $data,
+            ];
+        } catch (\Throwable $e) {
+            Yii::error('Error in actionToday: ' . $e->getMessage(), __METHOD__);
+            Yii::$app->response->statusCode = 500;
+            return [
+                'success' => false,
+                'message' => 'Failed to fetch today results',
+            ];
         }
-
-        return [
-            'success' => true,
-            'data' => $data,
-        ];
     }
 
     /**
@@ -137,6 +155,11 @@ class ResultController extends Controller
 
         $data = [];
         foreach ($results as $result) {
+            // Ensure locked is up-to-date based on slot scheduled time
+            if ($result->slot && $result->slot->isTimePassed() && !$result->locked) {
+                $result->locked = 1;
+                $result->save(false, ['locked']);
+            }
             $resultData = $result->toArray();
             $resultData['slot'] = $result->slot->toArray();
             $data[] = $resultData;
@@ -172,6 +195,45 @@ class ResultController extends Controller
         return [
             'success' => true,
             'data' => $data,
+        ];
+    }
+
+    /**
+     * Get all results for a specific month
+     * GET /results/month?month=YYYY-MM
+     */
+    public function actionMonth()
+    {
+        $month = Yii::$app->request->get('month');
+        if (!$month || !preg_match('/^\d{4}-\d{2}$/', $month)) {
+            Yii::$app->response->statusCode = 400;
+            return [
+                'success' => false,
+                'message' => 'Month parameter is required (format: YYYY-MM)',
+            ];
+        }
+
+        $results = Result::find()
+            ->joinWith('slot')
+            ->where(['like', 'declared_at', $month . '%', false])
+            ->orderBy(['declared_at' => SORT_ASC])
+            ->all();
+
+        $data = [];
+        foreach ($results as $result) {
+            if ($result->slot && $result->slot->isTimePassed() && !$result->locked) {
+                $result->locked = 1;
+                $result->save(false, ['locked']);
+            }
+            $row = $result->toArray();
+            $row['slot'] = $result->slot ? $result->slot->toArray() : null;
+            $data[] = $row;
+        }
+
+        return [
+            'success' => true,
+            'data' => $data,
+            'month' => $month,
         ];
     }
 

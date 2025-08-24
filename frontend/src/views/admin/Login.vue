@@ -1,25 +1,26 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-      <!-- Header -->
-      <div class="text-center">
-        <div class="mx-auto h-20 w-20 bg-blue-600 rounded-full flex items-center justify-center">
-          <i class="fas fa-crown text-3xl text-white"></i>
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full">
+      <div class="bg-white/90 rounded-2xl shadow-2xl px-8 py-10">
+        <!-- Header -->
+        <div class="text-center mb-8">
+          <div class="mx-auto h-20 w-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+            <i class="fas fa-crown text-4xl text-yellow-300 drop-shadow"></i>
+          </div>
+          <h2 class="mt-6 text-3xl font-extrabold text-gray-900 tracking-tight">
+            Admin Portal
+          </h2>
+          <p class="mt-2 text-base text-gray-500 font-medium">
+            Sign in to your admin account
+          </p>
         </div>
-        <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
-          Admin Login
-        </h2>
-        <p class="mt-2 text-sm text-gray-600">
-          Sign in to your admin account
-        </p>
-      </div>
 
-      <!-- Login Form -->
-      <form @submit.prevent="handleLogin" class="mt-8 space-y-6">
+        <!-- Login Form -->
+        <form @submit.prevent="handleLogin" class="space-y-6">
         <!-- Username Field -->
         <div>
-          <label for="username" class="form-label">
-            <i class="fas fa-user mr-2"></i>
+          <label for="username" class="block text-sm font-semibold text-gray-700 mb-1 tracking-wide">
+            <i class="fas fa-user mr-2 text-blue-500"></i>
             Username
           </label>
           <input
@@ -27,17 +28,18 @@
             v-model="form.username"
             type="text"
             required
-            class="form-input"
-            :class="{ 'border-red-500': errors.username }"
+            class="w-full rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-gray-50 px-4 py-3 text-base text-gray-800 placeholder-gray-400 shadow-sm transition-all duration-150"
+            :class="{ 'border-red-500 ring-red-100': errors.username }"
             placeholder="Enter your username"
+            autocomplete="username"
           />
           <p v-if="errors.username" class="form-error">{{ errors.username }}</p>
         </div>
 
         <!-- Password Field -->
         <div>
-          <label for="password" class="form-label">
-            <i class="fas fa-lock mr-2"></i>
+          <label for="password" class="block text-sm font-semibold text-gray-700 mb-1 tracking-wide">
+            <i class="fas fa-lock mr-2 text-blue-500"></i>
             Password
           </label>
           <div class="relative">
@@ -46,18 +48,20 @@
               v-model="form.password"
               :type="showPassword ? 'text' : 'password'"
               required
-              class="form-input pr-10"
-              :class="{ 'border-red-500': errors.password }"
+              class="w-full rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-gray-50 px-4 py-3 text-base text-gray-800 placeholder-gray-400 shadow-sm pr-10 transition-all duration-150"
+              :class="{ 'border-red-500 ring-red-100': errors.password }"
               placeholder="Enter your password"
+              autocomplete="current-password"
             />
             <button
               type="button"
               @click="showPassword = !showPassword"
               class="absolute inset-y-0 right-0 pr-3 flex items-center"
+              tabindex="-1"
             >
               <i 
                 :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"
-                class="text-gray-400 hover:text-gray-600"
+                class="text-gray-400 hover:text-blue-500 transition-colors"
               ></i>
             </button>
           </div>
@@ -133,6 +137,7 @@
       </div>
     </div>
   </div>
+</div>
 </template>
 
 <script>

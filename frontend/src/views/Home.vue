@@ -15,15 +15,7 @@
             Get real-time lottery results, browse historical data, and stay updated with the latest announcements.
           </p>
           
-          <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <router-link
-              to="/results"
-              class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors inline-flex items-center justify-center"
-            >
-              <i class="fas fa-list-ol mr-2"></i>
-              View Today's Results
-            </router-link>
-            
+          <div class="flex justify-center">
             <router-link
               to="/archive"
               class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors inline-flex items-center justify-center"
@@ -45,7 +37,7 @@
           </h2>
           <div class="h-1 w-24 mx-auto mt-4 rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
         </div>
-        <p class="text-gray-600 mt-4 max-w-xl mx-auto">Follow the flagship auto draws and manual slots as numbers update in real time.</p>
+       
       </div>
 
       <!-- Loading State -->
@@ -62,7 +54,7 @@
             :slot="slot"
             :primary="true"
             :todayResult="resultsBySlot[slot.id] || null"
-            :prevResult="prevResultsBySlot[slot.id] || '--'"
+            :prevResult="prevResultsBySlot[slot.id]"
           />
         </div>
 
@@ -73,7 +65,7 @@
             :key="slot.id"
             :slot="slot"
             :todayResult="resultsBySlot[slot.id] || null"
-            :prevResult="prevResultsBySlot[slot.id] || '--'"
+            :prevResult="prevResultsBySlot[slot.id]"
           />
         </div>
       </div>
@@ -207,16 +199,20 @@ export default {
       const map = {}
       if (!resultsStore.latestResults || !resultsStore.latestResults.length) return map
 
-      const todayKey = format(new Date(), 'yyyy-MM-dd')
+      const today = new Date()
+      const yesterday = new Date(today)
+      yesterday.setDate(today.getDate() - 1)
+      const yesterdayKey = format(yesterday, 'yyyy-MM-dd')
 
-      // We traverse latestResults (assumed newest first) and pick the first NON-today result per slot
+      // Only map explicit yesterday's declared results. Do NOT fallback to older entries.
       for (const r of resultsStore.latestResults) {
-        if (map[r.slot_id]) continue
         const declared = r.declared_at || r.created_at || ''
-        const datePart = declared.slice(0, 10) // assumes YYYY-MM-DD*
-        if (datePart === todayKey) continue // skip today's entries
-        map[r.slot_id] = r.result
+        const datePart = declared.slice(0, 10)
+        if (datePart === yesterdayKey) {
+          map[r.slot_id] = r.result
+        }
       }
+
       return map
     })
 

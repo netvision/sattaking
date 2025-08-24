@@ -87,13 +87,7 @@
           <span class="text-blue-800 font-medium">Create New Slot</span>
         </router-link>
 
-        <button
-          @click="showSetResultModal = true"
-          class="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors text-left"
-        >
-          <i class="fas fa-trophy text-green-600 text-xl mr-3"></i>
-          <span class="text-green-800 font-medium">Set Result</span>
-        </button>
+  <!-- Set Result action removed (manage results on /admin/results) -->
 
         <router-link
           to="/admin/results"
@@ -138,12 +132,7 @@
             
             <div class="flex items-center space-x-2">
               <span v-if="slot.is_auto" class="badge badge-info">Auto</span>
-              <button
-                @click="openSetResult(slot)"
-                class="btn btn-primary btn-sm"
-              >
-                Set Result
-              </button>
+              <!-- Set Result removed from dashboard; use Manage Results page -->
             </div>
           </div>
         </div>
@@ -195,51 +184,7 @@
       </div>
     </div>
 
-    <!-- Set Result Modal -->
-    <div v-if="showSetResultModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" @click="closeSetResultModal">
-      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white" @click.stop>
-        <div class="mt-3">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">
-            <i class="fas fa-trophy mr-2"></i>
-            Set Result
-          </h3>
-          
-          <form @submit.prevent="submitResult">
-            <div class="mb-4">
-              <label class="form-label">Select Slot</label>
-              <select v-model="resultForm.slot_id" class="form-input" required>
-                <option value="">Choose a slot...</option>
-                <option v-for="slot in pendingSlots" :key="slot.id" :value="slot.id">
-                  {{ slot.title }} - {{ formatTime(slot.scheduled_time) }}
-                </option>
-              </select>
-            </div>
-            
-            <div class="mb-4">
-              <label class="form-label">Result (0-99)</label>
-              <input
-                v-model.number="resultForm.result"
-                type="number"
-                min="0"
-                max="99"
-                class="form-input"
-                required
-              />
-            </div>
-            
-            <div class="flex justify-end space-x-3">
-              <button type="button" @click="closeSetResultModal" class="btn btn-outline">
-                Cancel
-              </button>
-              <button type="submit" class="btn btn-primary" :disabled="resultsStore.loading">
-                <i class="fas fa-save mr-2"></i>
-                Save Result
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+  <!-- Set Result modal removed from dashboard; manage results on Manage Results page -->
   </div>
 </template>
 
@@ -257,11 +202,7 @@ export default {
     const resultsStore = useResultsStore()
     const slotsStore = useSlotsStore()
     
-    const showSetResultModal = ref(false)
-    const resultForm = reactive({
-      slot_id: '',
-      result: null
-    })
+  // Set result modal removed from dashboard; state/functions cleaned up
 
     // Current time display
     const currentTime = ref('')
@@ -313,30 +254,7 @@ export default {
       return resultsStore.todayResults.slice(-5).reverse()
     })
 
-    const openSetResult = (slot) => {
-      resultForm.slot_id = slot.id
-      resultForm.result = null
-      showSetResultModal.value = true
-    }
-
-    const closeSetResultModal = () => {
-      showSetResultModal.value = false
-      resultForm.slot_id = ''
-      resultForm.result = null
-    }
-
-    const submitResult = async () => {
-      const result = await resultsStore.createResult({
-        slot_id: resultForm.slot_id,
-        result: resultForm.result
-      })
-
-      if (result.success) {
-        closeSetResultModal()
-        // Refresh data
-        await loadDashboardData()
-      }
-    }
+  // set-result helpers removed
 
     const loadDashboardData = async () => {
       await Promise.all([
@@ -356,14 +274,9 @@ export default {
       stats,
       pendingSlots,
       recentResults,
-      showSetResultModal,
-      resultForm,
       currentTime,
       currentDate,
-      formatTime,
-      openSetResult,
-      closeSetResultModal,
-      submitResult
+      formatTime
     }
   }
 }

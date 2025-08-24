@@ -48,8 +48,8 @@
           </template>
           <template v-else>
             <div class="text-6xl md:text-7xl text-gray-400 mb-2">
-              <i v-if="timePassed" class="fas fa-spinner animate-spin"></i>
-              <i v-else class="fas fa-clock"></i>
+              <i v-if="timePassed" class="far fa-hourglass-half"></i>
+              <i v-else class="far fa-clock"></i>
             </div>
             <div class="text-xs font-medium text-gray-600">{{ timePassed ? 'Awaiting' : 'Scheduled' }}</div>
           </template>
@@ -83,8 +83,10 @@ export default {
   name: 'SlotCard',
   props: {
     slot: { type: Object, required: true },
+    // todayResult is a result object when declared (contains `.result` and `.declared_at`)
     todayResult: { type: Object, default: null },
-    prevResult: { type: [String, Number, null], default: null },
+    // prevResult is expected to be a raw result value (string/number) coming only from explicit yesterday mapping
+    prevResult: { type: [String, Number, Object, null], default: null },
     primary: { type: Boolean, default: false }
   },
   setup(props) {
@@ -139,7 +141,14 @@ export default {
       return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`
     })
 
-    const prevDisplay = computed(() => props.prevResult ?? '--')
+    // prevResult should be an explicit yesterday value; otherwise show '--'
+    const prevDisplay = computed(() => {
+      // if prevResult is an object (legacy), try to read .result
+      if (props.prevResult && typeof props.prevResult === 'object') {
+        return props.prevResult.result ?? '--'
+      }
+      return props.prevResult != null ? props.prevResult : '--'
+    })
 
     // Trend (compares today vs yesterday if both numeric)
     const trendIcon = computed(() => {
@@ -164,7 +173,25 @@ export default {
       return 'text-gray-500'
     })
 
-    const showTodayResult = computed(() => !!props.todayResult && timePassed.value)
+    // Show today's result only if a declared todayResult exists (object with .result) and scheduled time has passed
+    const showTodayResult = computed(() => {
+      if (!props.todayResult) return false
+      // require a real result value
+      if (props.todayResult.result == null) return false
+
+      // prefer declared_at/created_at date to ensure the result is for today
+      const declared = props.todayResult.declared_at || props.todayResult.created_at || ''
+      try {
+        const todayKey = new Date().toISOString().slice(0, 10)
+        const declaredKey = declared ? (new Date(declared).toISOString().slice(0, 10)) : null
+        // only show if declared today (or if declared date is missing but we have a result)
+        const declaredToday = declaredKey ? declaredKey === todayKey : true
+        return declaredToday && timePassed.value
+      } catch (e) {
+        // fallback to previous behavior if parsing fails
+        return timePassed.value
+      }
+    })
 
     const statusTag = computed(() => {
       if (showTodayResult.value) return { label: 'Declared', class: 'bg-emerald-500/20 text-emerald-700', icon: 'fas fa-check-circle' }
@@ -295,5 +322,15 @@ export default {
 @keyframes progressFlow { 0% { filter: hue-rotate(0deg);} 100% { filter: hue-rotate(360deg);} }
 .animate-progress { animation: progressFlow 6s linear infinite; }
 
-.countdown-chip { @apply inline-flex items-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[11px] font-semibold px-2 py-1 rounded-md shadow; }
+.countdown-chip {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(90deg, #2563eb 0%, #4f46e5 100%);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
 </style>
